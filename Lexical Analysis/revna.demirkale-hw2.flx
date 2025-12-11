@@ -1,0 +1,67 @@
+%{
+#include <stdio.h>
+#include "revna.demirkale-hw2.tab.h"
+int comment_level = 0;
+%}
+
+%option yylineno
+%x COMMENT
+
+tPLUS		"+"
+tMINUS		"-"
+tMUL		"*"
+tEXP		"^"
+tLPR		"("
+tRPR		")"
+tASSIGN		"="
+tCOMMA		","
+tSEMICOLON	";"
+
+tDERIVATION	"D"
+tINTEGRATION	"I"
+
+tCALCULATE	"calculate"
+tIDENTIFIER	[a-z]
+tINTEGER	[1-9][0-9]*
+
+%%
+
+{tPLUS}		{ return tPLUS; }
+{tMINUS}	{ return tMINUS; }
+{tMUL}		{ return tMUL; }
+{tEXP}		{ return tEXP; }
+{tLPR}		{ return tLPR; }
+{tRPR}		{ return tRPR; }
+{tASSIGN}	{ return tASSIGN; }
+{tCOMMA}	{ return tCOMMA; }
+{tSEMICOLON}	{ return tSEMICOLON; }
+
+{tDERIVATION}	{ return tDERIVATION; }
+{tINTEGRATION}	{ return tINTEGRATION; }
+{tCALCULATE}	{ return tCALCULATE; }
+
+{tIDENTIFIER}	{ return tIDENTIFIER; }	
+{tINTEGER}	{ return tINTEGER; }
+
+"//".*		{}
+
+"/*"		{
+		comment_level++;
+		BEGIN (COMMENT);
+}
+
+<COMMENT>"/*"		{ comment_level++; }
+
+<COMMENT>"//"[^\n]*	{}	
+
+<COMMENT>"*/"		{ if (--comment_level == 0) { BEGIN 0; } }
+
+<COMMENT>\n		{}
+
+<COMMENT>.		{}
+
+[\n\t\r ]		{}
+
+.			{ return yytext[0]; }
+
+%%
