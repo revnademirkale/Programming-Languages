@@ -1,0 +1,43 @@
+%{
+#include "revna.demirkale-hw3.tab.h"
+
+int current_line = 1;
+%}
+
+%%
+
+"calculate"     { return tCALCULATE; }
+"D"             { return tDERIVATION; }
+"I"             { return tINTEGRATION; }
+
+[a-z]           { 
+    yylval.char_val = yytext[0]; 
+    return tIDENTIFIER; 
+}
+
+[0-9]+          { 
+    yylval.int_val = atoi(yytext); 
+    return tINTEGER; 
+}
+
+"+"             { return tPLUS; }
+"-"             { return tMINUS; }
+"*"             { return tMUL; }
+"^"             { return tEXP; }
+"("             { return tLPR; }
+")"             { return tRPR; }
+"="             { return tASSIGN; }
+","             { return tCOMMA; }
+";"             { return tSEMICOLON; }
+
+\n              { current_line++; } 
+[ \t\r]+        ; 
+
+.               { return yytext[0]; }
+
+%%
+
+
+int yywrap() {
+    return 1;
+}
