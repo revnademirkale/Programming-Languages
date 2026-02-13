@@ -1,0 +1,50 @@
+%{
+#include <stdio.h>
+int lineno = 1;
+int comment_depth = 0;
+%}
+
+%x COMMENT
+
+%%
+
+"calculate"        { printf("%d_tCALCULATE\n", lineno); }
+"D"                { printf("%d_tDERIVATION\n", lineno); }
+"I"                { printf("%d_tINTEGRATION\n", lineno); }
+
+"+"                { printf("%d_tPLUS\n", lineno); }
+"-"                { printf("%d_tMINUS\n", lineno); }
+"*"                { printf("%d_tMUL\n", lineno); }
+"^"                { printf("%d_tEXP\n", lineno); }
+"="                { printf("%d_tASSIGN\n", lineno); }
+","                { printf("%d_tCOMMA\n", lineno); }
+";"                { printf("%d_tSEMICOLON\n", lineno); }
+"("                { printf("%d_tLPR\n", lineno); }
+")"                { printf("%d_tRPR\n", lineno); }
+
+[1-9][0-9]*        { printf("%d_tINTEGER_(%s)\n", lineno, yytext); }
+[a-z]              { printf("%d_tIDENTIFIER_(%s)\n", lineno, yytext); }
+
+"//".*             { /* single-line comment */ }
+
+"/*"               { comment_depth = 1; BEGIN(COMMENT); }
+
+<COMMENT>{
+    "/*"           { comment_depth++; }
+    "*/"           { if (--comment_depth == 0) BEGIN(INITIAL); }
+    \n             { lineno++; }
+    .              { /* consume comment content */ }
+    <<EOF>>        { BEGIN(INITIAL); return 0; }
+}
+
+\n                 { lineno++; }
+[ \t\r]+           { /* ignore whitespace */ }
+
+.                  { printf("%d_ILLEGAL_CHARACTER_(%s)\n", lineno, yytext); }
+
+%%
+
+int main(void) {
+    yylex();
+    return 0;
+}
